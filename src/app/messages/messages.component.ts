@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RxStompService} from '@stomp/ng2-stompjs';
 import { Message } from '@stomp/stompjs';
 import { Subscription } from 'rxjs';
+import { UUID } from 'angular2-uuid';
 
 @Component({
   selector: 'app-messages',
@@ -26,6 +27,10 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   onSendMessage() {
     const message = `Message generated at ${new Date}`;
-    this.rxStompService.publish({destination: '/topic/demo', body: message});
+    const receipt_id = UUID.UUID();
+    this.rxStompService.watchForReceipt(receipt_id, (frame) => {
+      console.log('Receipt: ', frame);
+    });
+    this.rxStompService.publish({destination: '/topic/demo', body: message, headers: {receipt: receipt_id}});
   }
 }
